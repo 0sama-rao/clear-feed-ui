@@ -69,3 +69,26 @@ export interface AdminStats {
   totalArticles: number;
   totalMatched: number;
 }
+
+// ── Digest ──
+
+export interface DigestResult {
+  message: string;
+  result: {
+    scraped: number;
+    matched: number;
+    summarized: number;
+    errors: string[];
+  };
+}
+
+export interface DigestAllResult {
+  message: string;
+  results: Array<{
+    userId: string;
+    scraped: number;
+    matched: number;
+    summarized: number;
+    errorCount: number;
+  }>;
+}

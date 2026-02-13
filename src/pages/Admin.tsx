@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Shield, Users, Globe, Tags, FileText, CheckSquare } from 'lucide-react';
-import { getAdminUsers, getAdminStats } from '../lib/services';
+import { Shield, Users, Globe, Tags, FileText, CheckSquare, Play } from 'lucide-react';
+import { getAdminUsers, getAdminStats, runAllDigests } from '../lib/services';
 import type { AdminUser, AdminStats } from '../lib/types';
+import Button from '../components/ui/Button';
 import Alert from '../components/ui/Alert';
 import Spinner from '../components/ui/Spinner';
 
@@ -10,6 +11,10 @@ export default function Admin() {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Run all digests state
+  const [digestRunning, setDigestRunning] = useState(false);
+  const [digestMessage, setDigestMessage] = useState('');
 
   useEffect(() => {
     async function load() {
@@ -40,10 +45,45 @@ export default function Admin() {
 
   return (
     <div>
-      <div className="flex items-center gap-2 mb-6">
-        <Shield className="h-6 w-6 text-primary" />
-        <h1 className="text-2xl font-bold text-text">Admin</h1>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <Shield className="h-6 w-6 text-primary" />
+          <h1 className="text-2xl font-bold text-text">Admin</h1>
+        </div>
+        <Button
+          onClick={async () => {
+            setDigestRunning(true);
+            setDigestMessage('');
+            setError('');
+            try {
+              const data = await runAllDigests();
+              const totalScraped = data.results.reduce((s, r) => s + r.scraped, 0);
+              const totalMatched = data.results.reduce((s, r) => s + r.matched, 0);
+              const totalSummarized = data.results.reduce((s, r) => s + r.summarized, 0);
+              setDigestMessage(
+                `Digest completed for ${data.results.length} user(s): ${totalScraped} scraped, ${totalMatched} matched, ${totalSummarized} summarized.`
+              );
+              // Refresh stats
+              const newStats = await getAdminStats();
+              setStats(newStats);
+            } catch {
+              setError('Failed to run digests for all users.');
+            } finally {
+              setDigestRunning(false);
+            }
+          }}
+          isLoading={digestRunning}
+        >
+          <Play className="h-4 w-4 mr-1.5" />
+          {digestRunning ? 'Running...' : 'Run All Digests'}
+        </Button>
       </div>
+
+      {digestMessage && (
+        <Alert variant="success" className="mb-4">
+          {digestMessage}
+        </Alert>
+      )}
 
       {error && (
         <Alert variant="error" className="mb-4">

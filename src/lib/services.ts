@@ -6,6 +6,8 @@ import type {
   FeedArticleDetail,
   AdminUser,
   AdminStats,
+  DigestResult,
+  DigestAllResult,
 } from './types';
 
 // ── Sources ──
@@ -78,5 +80,31 @@ export async function getAdminUsers(): Promise<AdminUser[]> {
 
 export async function getAdminStats(): Promise<AdminStats> {
   const { data } = await api.get<AdminStats>('/api/admin/stats');
+  return data;
+}
+
+// ── Digest ──
+
+export async function runDigest(): Promise<DigestResult> {
+  const { data } = await api.request<DigestResult>({
+    method: 'POST',
+    url: '/api/digest/run',
+    transformRequest: [(_data, headers) => {
+      headers.delete('Content-Type');
+      return undefined;
+    }],
+  });
+  return data;
+}
+
+export async function runAllDigests(): Promise<DigestAllResult> {
+  const { data } = await api.request<DigestAllResult>({
+    method: 'POST',
+    url: '/api/digest/run-all',
+    transformRequest: [(_data, headers) => {
+      headers.delete('Content-Type');
+      return undefined;
+    }],
+  });
   return data;
 }
