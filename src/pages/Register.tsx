@@ -22,7 +22,7 @@ export default function Register() {
 
     try {
       await register(name, email, password);
-      navigate('/dashboard');
+      navigate('/onboarding');
     } catch (err: unknown) {
       if (
         err &&

@@ -23,6 +23,8 @@ export interface ArticleSource {
   url: string;
 }
 
+// ── v1 flat feed (still used for "All Articles" toggle) ──
+
 export interface FeedArticle {
   id: string;
   title: string;
@@ -51,6 +53,106 @@ export interface FeedResponse {
   articles: FeedArticle[];
   pagination: PaginationInfo;
 }
+
+// ── v2 Onboarding ──
+
+export interface Signal {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+}
+
+export interface Industry {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  signals: Signal[];
+}
+
+export interface IndustriesResponse {
+  industries: Industry[];
+}
+
+export interface OnboardingResult {
+  message: string;
+  industry: { id: string; name: string; slug: string };
+  sourcesAdded: number;
+  keywordsAdded: number;
+}
+
+// ── v2 Grouped Intelligence Feed ──
+
+export interface Entity {
+  type: 'COMPANY' | 'PERSON' | 'PRODUCT' | 'GEOGRAPHY' | 'SECTOR';
+  name: string;
+  confidence: number;
+}
+
+export interface ArticleSignal {
+  name: string;
+  slug: string;
+  confidence: number;
+}
+
+export interface GroupArticlePreview {
+  id: string;
+  title: string;
+  url: string;
+  publishedAt: string;
+  source: ArticleSource;
+  entities: Entity[];
+  signals: ArticleSignal[];
+}
+
+export interface GroupBriefing {
+  id: string;
+  title: string;
+  synopsis: string;
+  executiveSummary: string;
+  impactAnalysis: string;
+  actionability: string;
+  confidence: number;
+  date: string;
+  articleCount: number;
+  articles: GroupArticlePreview[];
+}
+
+export interface GroupedFeedResponse {
+  groups: GroupBriefing[];
+  pagination: PaginationInfo;
+}
+
+export interface GroupArticleFull {
+  id: string;
+  title: string;
+  url: string;
+  content: string | null;
+  cleanText: string | null;
+  summary: string | null;
+  publishedAt: string;
+  author: string | null;
+  source: ArticleSource;
+  entities: Entity[];
+  signals: ArticleSignal[];
+  matchedKeywords: string[];
+  read: boolean;
+}
+
+export interface GroupDetail {
+  id: string;
+  title: string;
+  synopsis: string;
+  executiveSummary: string;
+  impactAnalysis: string;
+  actionability: string;
+  confidence: number;
+  date: string;
+  articles: GroupArticleFull[];
+}
+
+// ── Admin ──
 
 export interface AdminUser {
   id: string;

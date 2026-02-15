@@ -8,6 +8,10 @@ import type {
   AdminStats,
   DigestResult,
   DigestAllResult,
+  IndustriesResponse,
+  OnboardingResult,
+  GroupedFeedResponse,
+  GroupDetail,
 } from './types';
 
 // ── Sources ──
@@ -54,7 +58,7 @@ export async function deleteKeyword(id: string): Promise<void> {
   await api.delete(`/api/keywords/${id}`);
 }
 
-// ── Feed ──
+// ── Feed (v1 flat) ──
 
 export async function getFeed(
   page = 1,
@@ -68,6 +72,50 @@ export async function getFeed(
 
 export async function getFeedArticle(id: string): Promise<FeedArticleDetail> {
   const { data } = await api.get<FeedArticleDetail>(`/api/feed/${id}`);
+  return data;
+}
+
+// ── Feed (v2 grouped intelligence) ──
+
+export async function getGroupedFeed(
+  page = 1,
+  limit = 10,
+  date?: string
+): Promise<GroupedFeedResponse> {
+  const { data } = await api.get<GroupedFeedResponse>('/api/feed/brief', {
+    params: { page, limit, ...(date ? { date } : {}) },
+  });
+  return data;
+}
+
+export async function getGroupDetail(id: string): Promise<GroupDetail> {
+  const { data } = await api.get<GroupDetail>(`/api/feed/groups/${id}`);
+  return data;
+}
+
+// ── Onboarding ──
+
+export async function getIndustries(): Promise<IndustriesResponse> {
+  const { data } = await api.get<IndustriesResponse>('/api/onboarding/industries');
+  return data;
+}
+
+export async function submitOnboarding(industrySlug: string): Promise<OnboardingResult> {
+  const { data } = await api.post<OnboardingResult>('/api/onboarding', {
+    industrySlug,
+  });
+  return data;
+}
+
+export async function resetGroups(): Promise<{ message: string }> {
+  const { data } = await api.request<{ message: string }>({
+    method: 'POST',
+    url: '/api/feed/brief/reset',
+    transformRequest: [(_data, headers) => {
+      headers.delete('Content-Type');
+      return undefined;
+    }],
+  });
   return data;
 }
 

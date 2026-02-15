@@ -3,10 +3,12 @@ import { useAuth } from '../context/AuthContext';
 
 export default function ProtectedRoute({
   children,
+  skipOnboardingCheck = false,
 }: {
   children: React.ReactNode;
+  skipOnboardingCheck?: boolean;
 }) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, onboarded } = useAuth();
 
   if (isLoading) {
     return (
@@ -18,6 +20,11 @@ export default function ProtectedRoute({
 
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Redirect non-onboarded users to onboarding (unless we're already on onboarding)
+  if (!skipOnboardingCheck && !onboarded) {
+    return <Navigate to="/onboarding" replace />;
   }
 
   return <>{children}</>;
