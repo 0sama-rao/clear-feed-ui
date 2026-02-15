@@ -9,6 +9,7 @@ import EntityChip from '../components/ui/EntityChip';
 import Accordion from '../components/ui/Accordion';
 import Alert from '../components/ui/Alert';
 import Spinner from '../components/ui/Spinner';
+import Prose from '../components/ui/Prose';
 
 export default function GroupDetail() {
   const { id } = useParams<{ id: string }>();
@@ -71,29 +72,42 @@ export default function GroupDetail() {
         <ConfidenceScore score={group.confidence} className="shrink-0 mt-1" />
       </div>
 
+      {/* Case type badge */}
+      {group.caseType === 1 && (
+        <span className="inline-block text-xs font-semibold text-red-700 bg-red-50 rounded-full px-3 py-1 mb-4">
+          Actively Exploited
+        </span>
+      )}
+      {group.caseType === 2 && (
+        <span className="inline-block text-xs font-semibold text-orange-700 bg-orange-50 rounded-full px-3 py-1 mb-4">
+          Vulnerable — No Known Exploit
+        </span>
+      )}
+      {group.caseType === 3 && (
+        <span className="inline-block text-xs font-semibold text-emerald-700 bg-emerald-50 rounded-full px-3 py-1 mb-4">
+          Fixed
+        </span>
+      )}
+
       {/* Synopsis */}
       <p className="text-sm text-text-secondary leading-relaxed mb-6">{group.synopsis}</p>
 
       {/* Executive Summary */}
       <div className="bg-primary-light border border-primary/20 rounded-md px-5 py-4 mb-6">
         <p className="text-xs font-semibold text-primary mb-2">Executive Summary</p>
-        <div className="text-sm text-text leading-relaxed whitespace-pre-line">
-          {group.executiveSummary}
-        </div>
+        <Prose content={group.executiveSummary} />
       </div>
 
       {/* Impact Analysis */}
       <div className="bg-surface border border-border rounded-md px-5 py-4 mb-4">
         <p className="text-xs font-semibold text-text-secondary mb-2">Impact Analysis</p>
-        <p className="text-sm text-text leading-relaxed">{group.impactAnalysis}</p>
+        <Prose content={group.impactAnalysis} />
       </div>
 
       {/* Actionability */}
       <div className="bg-surface border border-border rounded-md px-5 py-4 mb-6">
         <p className="text-xs font-semibold text-text-secondary mb-2">What To Do</p>
-        <div className="text-sm text-text leading-relaxed whitespace-pre-line">
-          {group.actionability}
-        </div>
+        <Prose content={group.actionability} />
       </div>
 
       {/* All articles */}

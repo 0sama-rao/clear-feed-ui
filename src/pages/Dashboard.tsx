@@ -9,11 +9,13 @@ import {
   FileText,
   List,
 } from 'lucide-react';
-import { getFeed, getGroupedFeed, runDigest, resetGroups } from '../lib/services';
+import { getFeed, getGroupedFeed, runDigest, resetGroups, getPeriodReport } from '../lib/services';
 import type {
   FeedArticle,
   PaginationInfo,
   GroupBriefing,
+  Period,
+  PeriodReport,
 } from '../lib/types';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
@@ -25,6 +27,8 @@ import ConfidenceScore from '../components/ui/ConfidenceScore';
 import SignalBadge from '../components/ui/SignalBadge';
 import EntityChip from '../components/ui/EntityChip';
 import Accordion from '../components/ui/Accordion';
+import ReportCard from '../components/ui/ReportCard';
+import Prose from '../components/ui/Prose';
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -36,17 +40,35 @@ function timeAgo(dateStr: string): string {
   return `${days}d ago`;
 }
 
+// caseType → left border color
+const caseBorderColors: Record<number, string> = {
+  1: 'border-l-4 border-l-red-500',    // Actively Exploited
+  2: 'border-l-4 border-l-orange-400',  // Vulnerable, No Exploit
+  3: 'border-l-4 border-l-emerald-400', // Fixed
+  4: '',                                 // Not Applicable
+};
+
 type ViewMode = 'brief' | 'articles';
+
+const periods: { value: Period; label: string }[] = [
+  { value: '1d', label: 'Today' },
+  { value: '7d', label: '7 Days' },
+  { value: '30d', label: '30 Days' },
+];
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<ViewMode>('brief');
+  const [period, setPeriod] = useState<Period>('7d');
 
   // Grouped feed state
   const [groups, setGroups] = useState<GroupBriefing[]>([]);
   const [groupPagination, setGroupPagination] = useState<PaginationInfo | null>(null);
   const [groupPage, setGroupPage] = useState(1);
   const [groupLoading, setGroupLoading] = useState(true);
+
+  // Period report state
+  const [report, setReport] = useState<PeriodReport | null>(null);
 
   // Flat feed state
   const [articles, setArticles] = useState<FeedArticle[]>([]);
@@ -65,7 +87,7 @@ export default function Dashboard() {
     try {
       setError('');
       setGroupLoading(true);
-      const data = await getGroupedFeed(groupPage);
+      const data = await getGroupedFeed(groupPage, 10, period);
       setGroups(data.groups);
       setGroupPagination(data.pagination);
     } catch {
@@ -73,7 +95,17 @@ export default function Dashboard() {
     } finally {
       setGroupLoading(false);
     }
-  }, [groupPage]);
+  }, [groupPage, period]);
+
+  const fetchReport = useCallback(async () => {
+    try {
+      const data = await getPeriodReport(period);
+      setReport(data);
+    } catch {
+      // Report may not exist yet — silently ignore
+      setReport(null);
+    }
+  }, [period]);
 
   const fetchArticles = useCallback(async () => {
     try {
@@ -90,12 +122,20 @@ export default function Dashboard() {
   }, [articlePage]);
 
   useEffect(() => {
-    if (viewMode === 'brief') fetchGroups();
-  }, [viewMode, fetchGroups]);
+    if (viewMode === 'brief') {
+      fetchGroups();
+      fetchReport();
+    }
+  }, [viewMode, fetchGroups, fetchReport]);
 
   useEffect(() => {
     if (viewMode === 'articles') fetchArticles();
   }, [viewMode, fetchArticles]);
+
+  // Reset to page 1 when period changes
+  useEffect(() => {
+    setGroupPage(1);
+  }, [period]);
 
   async function handleRunDigest() {
     setDigestRunning(true);
@@ -107,8 +147,12 @@ export default function Dashboard() {
       let msg = `Found ${scraped} articles, ${matched} matched, ${summarized} summarized.`;
       if (errors.length > 0) msg += ` ${errors.length} source(s) had errors.`;
       setDigestMessage(msg);
-      if (viewMode === 'brief') await fetchGroups();
-      else await fetchArticles();
+      if (viewMode === 'brief') {
+        await fetchGroups();
+        await fetchReport();
+      } else {
+        await fetchArticles();
+      }
     } catch {
       setError('Failed to run digest. Please try again.');
     } finally {
@@ -167,7 +211,7 @@ export default function Dashboard() {
       {error && <Alert variant="error" className="mb-4">{error}</Alert>}
 
       {/* View toggle */}
-      <div className="flex items-center gap-1 mb-5 bg-surface border border-border rounded-md p-1 w-fit">
+      <div className="flex items-center gap-1 mb-4 bg-surface border border-border rounded-md p-1 w-fit">
         <button
           onClick={() => setViewMode('brief')}
           className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded transition-colors cursor-pointer ${
@@ -188,6 +232,25 @@ export default function Dashboard() {
         </button>
       </div>
 
+      {/* Period tabs — only in brief view */}
+      {viewMode === 'brief' && (
+        <div className="flex items-center gap-1 mb-5">
+          {periods.map((p) => (
+            <button
+              key={p.value}
+              onClick={() => setPeriod(p.value)}
+              className={`text-xs font-medium px-3 py-1.5 rounded-full transition-colors cursor-pointer ${
+                period === p.value
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-text-secondary hover:text-text hover:bg-surface'
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      )}
+
       {viewMode === 'brief' ? (
         <BriefView
           groups={groups}
@@ -197,6 +260,7 @@ export default function Dashboard() {
           onRunDigest={handleRunDigest}
           digestRunning={digestRunning}
           navigate={navigate}
+          report={report}
         />
       ) : (
         <ArticlesView
@@ -216,7 +280,7 @@ export default function Dashboard() {
 // ── Grouped Intelligence Brief View ──
 
 function BriefView({
-  groups, pagination, page, onPageChange, onRunDigest, digestRunning, navigate,
+  groups, pagination, page, onPageChange, onRunDigest, digestRunning, navigate, report,
 }: {
   groups: GroupBriefing[];
   pagination: PaginationInfo | null;
@@ -225,6 +289,7 @@ function BriefView({
   onRunDigest: () => void;
   digestRunning: boolean;
   navigate: (path: string) => void;
+  report: PeriodReport | null;
 }) {
   if (groups.length === 0) {
     return (
@@ -244,6 +309,9 @@ function BriefView({
 
   return (
     <>
+      {/* Period report card */}
+      {report && <ReportCard report={report} />}
+
       {pagination && (
         <p className="text-xs text-text-secondary mb-4">
           {pagination.total} stories &middot; {groups.reduce((s, g) => s + g.articleCount, 0)} articles analyzed
@@ -274,8 +342,10 @@ function StoryCard({ group, navigate }: { group: GroupBriefing; navigate: (path:
     .filter((e, i, arr) => arr.findIndex((x) => x.type === e.type && x.name === e.name) === i)
     .slice(0, 8);
 
+  const borderClass = group.caseType ? (caseBorderColors[group.caseType] || '') : '';
+
   return (
-    <div className="bg-surface border border-border rounded-md overflow-hidden">
+    <div className={`bg-surface border border-border rounded-md overflow-hidden ${borderClass}`}>
       <div className="px-5 py-4">
         <div className="flex items-start justify-between gap-3 mb-2">
           <button
@@ -291,6 +361,18 @@ function StoryCard({ group, navigate }: { group: GroupBriefing; navigate: (path:
           <span>{group.articleCount} articles</span>
           <span className="text-text-secondary/40">&middot;</span>
           <span>{timeAgo(group.date)}</span>
+          {group.caseType === 1 && (
+            <>
+              <span className="text-text-secondary/40">&middot;</span>
+              <span className="text-red-600 font-semibold">Actively Exploited</span>
+            </>
+          )}
+          {group.caseType === 2 && (
+            <>
+              <span className="text-text-secondary/40">&middot;</span>
+              <span className="text-orange-600 font-medium">Vulnerable</span>
+            </>
+          )}
         </div>
 
         {uniqueSignals.length > 0 && (
@@ -313,17 +395,13 @@ function StoryCard({ group, navigate }: { group: GroupBriefing; navigate: (path:
 
         <div className="space-y-2 border-t border-border pt-3">
           <Accordion title="Executive Summary">
-            <div className="text-sm text-text leading-relaxed whitespace-pre-line">
-              {group.executiveSummary}
-            </div>
+            <Prose content={group.executiveSummary} />
           </Accordion>
           <Accordion title="Impact Analysis">
-            <p className="text-sm text-text leading-relaxed">{group.impactAnalysis}</p>
+            <Prose content={group.impactAnalysis} />
           </Accordion>
           <Accordion title="What To Do">
-            <div className="text-sm text-text leading-relaxed whitespace-pre-line">
-              {group.actionability}
-            </div>
+            <Prose content={group.actionability} />
           </Accordion>
           <Accordion
             title="Sources"

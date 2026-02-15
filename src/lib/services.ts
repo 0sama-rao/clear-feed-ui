@@ -12,6 +12,8 @@ import type {
   OnboardingResult,
   GroupedFeedResponse,
   GroupDetail,
+  Period,
+  PeriodReport,
 } from './types';
 
 // ── Sources ──
@@ -80,10 +82,17 @@ export async function getFeedArticle(id: string): Promise<FeedArticleDetail> {
 export async function getGroupedFeed(
   page = 1,
   limit = 10,
-  date?: string
+  period?: Period
 ): Promise<GroupedFeedResponse> {
   const { data } = await api.get<GroupedFeedResponse>('/api/feed/brief', {
-    params: { page, limit, ...(date ? { date } : {}) },
+    params: { page, limit, ...(period ? { period } : {}) },
+  });
+  return data;
+}
+
+export async function getPeriodReport(period: Period): Promise<PeriodReport> {
+  const { data } = await api.get<PeriodReport>('/api/feed/brief/report', {
+    params: { period },
   });
   return data;
 }

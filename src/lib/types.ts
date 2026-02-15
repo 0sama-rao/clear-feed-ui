@@ -114,6 +114,7 @@ export interface GroupBriefing {
   impactAnalysis: string;
   actionability: string;
   confidence: number;
+  caseType: number | null;
   date: string;
   articleCount: number;
   articles: GroupArticlePreview[];
@@ -148,8 +149,35 @@ export interface GroupDetail {
   impactAnalysis: string;
   actionability: string;
   confidence: number;
+  caseType: number | null;
   date: string;
   articles: GroupArticleFull[];
+}
+
+// ── Period Reports ──
+
+export type Period = '1d' | '7d' | '30d';
+
+export interface PeriodReportEntity {
+  name: string;
+  type: Entity['type'];
+  count: number;
+}
+
+export interface PeriodReport {
+  period: Period;
+  fromDate: string;
+  toDate: string;
+  summary: string;
+  stats: {
+    totalStories: number;
+    totalArticles: number;
+    criticalStories: number;
+    signalDistribution: Record<string, number>;
+    topEntities: PeriodReportEntity[];
+    storiesPerDay: Record<string, number>;
+  };
+  generatedAt: string;
 }
 
 // ── Admin ──
