@@ -97,7 +97,7 @@ export default function Onboarding() {
         {/* Header */}
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold text-primary mb-2">
-            Welcome to Clearfeed
+            Welcome to Cyber Brief
           </h1>
           <p className="text-text-secondary text-base">
             What field are you in? We'll set up your intelligence feed automatically.

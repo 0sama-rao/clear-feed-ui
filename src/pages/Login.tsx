@@ -57,7 +57,7 @@ export default function Login() {
             className="text-3xl font-bold"
             style={{ color: 'var(--color-primary)' }}
           >
-            Clearfeed
+            Cyber Brief
           </h1>
           <p className="text-text-secondary text-sm mt-2">
             Sign in to your account

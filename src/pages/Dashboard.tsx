@@ -51,9 +51,9 @@ const caseBorderColors: Record<number, string> = {
 type ViewMode = 'brief' | 'articles';
 
 const periods: { value: Period; label: string }[] = [
-  { value: '1d', label: 'Today' },
-  { value: '7d', label: '7 Days' },
-  { value: '30d', label: '30 Days' },
+  { value: '1d', label: 'Daily' },
+  { value: '7d', label: 'Weekly' },
+  { value: '30d', label: 'Monthly' },
 ];
 
 export default function Dashboard() {
@@ -394,7 +394,7 @@ function StoryCard({ group, navigate }: { group: GroupBriefing; navigate: (path:
         <p className="text-sm text-text-secondary leading-relaxed mb-3">{group.synopsis}</p>
 
         <div className="space-y-2 border-t border-border pt-3">
-          <Accordion title="Executive Summary">
+          <Accordion title="Executive Brief">
             <Prose content={group.executiveSummary} />
           </Accordion>
           <Accordion title="Impact Analysis">

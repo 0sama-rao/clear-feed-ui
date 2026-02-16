@@ -5,9 +5,9 @@ import SignalBadge from './SignalBadge';
 import Prose from './Prose';
 
 const periodLabels: Record<string, string> = {
-  '1d': 'Daily',
-  '7d': 'Weekly',
-  '30d': 'Monthly',
+  '1d': 'Daily Cybersecurity Brief',
+  '7d': 'Weekly Cybersecurity Brief',
+  '30d': 'Monthly Cybersecurity Brief',
 };
 
 function formatDateRange(from: string, to: string): string {
@@ -40,7 +40,7 @@ export default function ReportCard({ report }: ReportCardProps) {
         <div className="flex items-center gap-2 mb-4">
           <BarChart3 className="h-4.5 w-4.5 text-primary" />
           <h2 className="text-sm font-semibold text-text">
-            {label} Intelligence Report
+            {label}
           </h2>
           <span className="text-xs text-text-secondary">({dateRange})</span>
         </div>

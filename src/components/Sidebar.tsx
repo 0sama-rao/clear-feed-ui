@@ -24,7 +24,7 @@ export default function Sidebar() {
       {/* Logo */}
       <div className="h-14 flex items-center px-5">
         <h1 className="text-lg font-bold text-white tracking-tight">
-          Clearfeed
+          Cyber Brief
         </h1>
       </div>
 

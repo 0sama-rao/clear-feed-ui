@@ -92,9 +92,9 @@ export default function GroupDetail() {
       {/* Synopsis */}
       <p className="text-sm text-text-secondary leading-relaxed mb-6">{group.synopsis}</p>
 
-      {/* Executive Summary */}
+      {/* Executive Brief */}
       <div className="bg-primary-light border border-primary/20 rounded-md px-5 py-4 mb-6">
-        <p className="text-xs font-semibold text-primary mb-2">Executive Summary</p>
+        <p className="text-xs font-semibold text-primary mb-2">Executive Brief</p>
         <Prose content={group.executiveSummary} />
       </div>
 
