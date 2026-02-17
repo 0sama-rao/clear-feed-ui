@@ -142,16 +142,23 @@ export default function Dashboard() {
     setDigestMessage('');
     setError('');
     try {
-      const result = await runDigest();
-      const { scraped, matched, summarized, errors } = result.result;
-      let msg = `Found ${scraped} articles, ${matched} matched, ${summarized} summarized.`;
-      if (errors.length > 0) msg += ` ${errors.length} source(s) had errors.`;
+      const data = await runDigest();
+
+      // Handle "already running" guard (backend may reject concurrent digests)
+      if ('status' in data && (data as Record<string, unknown>).status === 'already_running') {
+        setDigestMessage('A digest is already running. Please wait and try again.');
+        return;
+      }
+
+      const { result } = data;
+      let msg = `Found ${result.scraped} articles, ${result.matched} matched, ${result.summarized} summarized.`;
+      if (result.errors.length > 0) msg += ` ${result.errors.length} source(s) had errors.`;
       setDigestMessage(msg);
       if (viewMode === 'brief') {
-        await fetchGroups();
-        await fetchReport();
+        fetchGroups();
+        fetchReport();
       } else {
-        await fetchArticles();
+        fetchArticles();
       }
     } catch {
       setError('Failed to run digest. Please try again.');

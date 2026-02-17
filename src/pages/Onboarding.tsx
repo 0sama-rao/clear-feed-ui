@@ -54,14 +54,9 @@ export default function Onboarding() {
         `Added ${result.sourcesAdded} sources and ${result.keywordsAdded} keywords for ${result.industry.name}. Running your first digest...`
       );
 
-      // Auto-trigger first digest
-      try {
-        await runDigest();
-        setSetupMessage('Your intelligence feed is ready!');
-      } catch {
-        // Digest can fail on first run if sources haven't been scraped yet — that's ok
-        setSetupMessage('Setup complete! Your feed will populate shortly.');
-      }
+      // Kick off first digest in background (async — don't wait)
+      runDigest().catch(() => {});
+      setSetupMessage('Setup complete! Your first digest is running in the background.');
 
       setOnboarded(true);
 
