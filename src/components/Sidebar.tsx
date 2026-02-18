@@ -4,6 +4,7 @@ import {
   Globe,
   Tags,
   Shield,
+  Settings,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -11,6 +12,7 @@ const navItems = [
   { to: '/dashboard', label: 'Feed', icon: LayoutDashboard },
   { to: '/sources', label: 'Sources', icon: Globe },
   { to: '/keywords', label: 'Keywords', icon: Tags },
+  { to: '/settings', label: 'Settings', icon: Settings },
 ];
 
 export default function Sidebar() {

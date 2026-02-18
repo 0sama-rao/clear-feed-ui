@@ -14,6 +14,8 @@ import type {
   GroupDetail,
   Period,
   PeriodReport,
+  UserSettings,
+  DigestInterval,
 } from './types';
 
 // ── Sources ──
@@ -163,5 +165,21 @@ export async function runAllDigests(): Promise<DigestAllResult> {
       return undefined;
     }],
   });
+  return data;
+}
+
+// ── User Settings ──
+
+export async function getUserSettings(): Promise<UserSettings> {
+  const { data } = await api.get<UserSettings>('/api/settings');
+  return data;
+}
+
+export async function updateUserSettings(body: {
+  digestFrequency?: DigestInterval;
+  digestTime?: string;
+  emailEnabled?: boolean;
+}): Promise<UserSettings> {
+  const { data } = await api.put<UserSettings>('/api/settings', body);
   return data;
 }

@@ -176,6 +176,12 @@ export interface PeriodReport {
     signalDistribution: Record<string, number>;
     topEntities: PeriodReportEntity[];
     storiesPerDay: Record<string, number>;
+    vulnerableStories?: number;
+    fixedStories?: number;
+    infoStories?: number;
+    topAffectedProducts?: string[];
+    topAffectedSectors?: string[];
+    topThreatActors?: string[];
   };
   generatedAt: string;
 }
@@ -221,4 +227,16 @@ export interface DigestAllResult {
     summarized: number;
     errorCount: number;
   }>;
+}
+
+// ── User Settings (Schedule + Email) ──
+
+export type DigestInterval = '1h' | '3h' | '6h' | '12h' | '1d' | '3d' | '7d';
+
+export interface UserSettings {
+  digestFrequency: DigestInterval;
+  digestTime: string;          // HH:MM (UTC)
+  emailEnabled: boolean;
+  lastDigestAt: string | null;
+  email: string;
 }
