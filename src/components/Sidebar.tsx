@@ -3,6 +3,8 @@ import {
   LayoutDashboard,
   Globe,
   Tags,
+  Server,
+  ShieldAlert,
   Shield,
   Settings,
 } from 'lucide-react';
@@ -12,6 +14,8 @@ const navItems = [
   { to: '/dashboard', label: 'Feed', icon: LayoutDashboard },
   { to: '/sources', label: 'Sources', icon: Globe },
   { to: '/keywords', label: 'Keywords', icon: Tags },
+  { to: '/techstack', label: 'Tech Stack', icon: Server },
+  { to: '/exposure', label: 'Exposure', icon: ShieldAlert },
   { to: '/settings', label: 'Settings', icon: Settings },
 ];
 

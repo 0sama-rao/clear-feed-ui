@@ -16,6 +16,15 @@ import type {
   PeriodReport,
   UserSettings,
   DigestInterval,
+  TechStackItem,
+  TechStackCatalogItem,
+  TechStackBulkResult,
+  TechStackCreateResult,
+  TechStackCategory,
+  Exposure,
+  ExposureListResponse,
+  ExposureStats,
+  ExposureState,
 } from './types';
 
 // ── Sources ──
@@ -181,5 +190,81 @@ export async function updateUserSettings(body: {
   emailEnabled?: boolean;
 }): Promise<UserSettings> {
   const { data } = await api.put<UserSettings>('/api/settings', body);
+  return data;
+}
+
+// ── Tech Stack ──
+
+export async function getTechStack(): Promise<TechStackItem[]> {
+  const { data } = await api.get<TechStackItem[]>('/api/techstack');
+  return data;
+}
+
+export async function createTechStackItem(body: {
+  vendor: string;
+  product: string;
+  version?: string;
+  category: TechStackCategory;
+}): Promise<TechStackCreateResult> {
+  const { data } = await api.post<TechStackCreateResult>('/api/techstack', body);
+  return data;
+}
+
+export async function deleteTechStackItem(id: string): Promise<void> {
+  await api.delete(`/api/techstack/${id}`);
+}
+
+export async function searchTechStackCatalog(
+  search: string,
+  category?: TechStackCategory
+): Promise<TechStackCatalogItem[]> {
+  const { data } = await api.get<TechStackCatalogItem[]>('/api/techstack/catalog', {
+    params: { search, ...(category ? { category } : {}) },
+  });
+  return data;
+}
+
+export async function bulkAddTechStack(
+  items: Array<{ vendor: string; product: string; category: TechStackCategory }>
+): Promise<TechStackBulkResult> {
+  const { data } = await api.post<TechStackBulkResult>('/api/techstack/bulk', { items });
+  return data;
+}
+
+// ── Exposure ──
+
+export async function getExposures(params: {
+  state?: ExposureState;
+  page?: number;
+  limit?: number;
+  sort?: string;
+}): Promise<ExposureListResponse> {
+  const { data } = await api.get<ExposureListResponse>('/api/exposure', { params });
+  return data;
+}
+
+export async function getExposureStats(): Promise<ExposureStats> {
+  const { data } = await api.get<ExposureStats>('/api/exposure/stats');
+  return data;
+}
+
+export async function patchExposure(
+  cveId: string,
+  body?: { patchedAt?: string }
+): Promise<Exposure> {
+  const { data } = await api.post<Exposure>(`/api/exposure/${cveId}/patch`, body ?? {});
+  return data;
+}
+
+export async function updateExposure(
+  cveId: string,
+  body: { exposureState: ExposureState; notes?: string }
+): Promise<Exposure> {
+  const { data } = await api.put<Exposure>(`/api/exposure/${cveId}`, body);
+  return data;
+}
+
+export async function getOverdueExposures(): Promise<Exposure[]> {
+  const { data } = await api.get<Exposure[]>('/api/exposure/overdue');
   return data;
 }

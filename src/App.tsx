@@ -12,6 +12,8 @@ import Admin from './pages/Admin';
 import ArticleDetail from './pages/ArticleDetail';
 import GroupDetail from './pages/GroupDetail';
 import SettingsPage from './pages/Settings';
+import TechStack from './pages/TechStack';
+import ExposurePage from './pages/Exposure';
 
 export default function App() {
   return (
@@ -45,6 +47,8 @@ export default function App() {
             <Route path="/dashboard/group/:id" element={<GroupDetail />} />
             <Route path="/sources" element={<Sources />} />
             <Route path="/keywords" element={<Keywords />} />
+            <Route path="/techstack" element={<TechStack />} />
+            <Route path="/exposure" element={<ExposurePage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/admin" element={<Admin />} />
           </Route>

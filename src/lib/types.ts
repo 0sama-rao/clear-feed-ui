@@ -240,3 +240,97 @@ export interface UserSettings {
   lastDigestAt: string | null;
   email: string;
 }
+
+// ── Tech Stack ──
+
+export type TechStackCategory =
+  | 'EDGE_DEVICE'
+  | 'NETWORK'
+  | 'OS'
+  | 'APPLICATION'
+  | 'CLOUD'
+  | 'IDENTITY'
+  | 'DATABASE'
+  | 'LIBRARY'
+  | 'OTHER';
+
+export interface TechStackItem {
+  id: string;
+  userId: string;
+  vendor: string;
+  product: string;
+  version: string | null;
+  category: TechStackCategory;
+  cpePattern: string;
+  active: boolean;
+  createdAt: string;
+  _count: { exposures: number };
+}
+
+export interface TechStackCatalogItem {
+  vendor: string;
+  product: string;
+  category: TechStackCategory;
+  displayName: string;
+}
+
+export interface TechStackBulkResult {
+  added: number;
+  skipped: number;
+}
+
+export interface TechStackCreateResult extends TechStackItem {
+  retroactiveMatches: number;
+}
+
+// ── Exposure ──
+
+export type ExposureState = 'VULNERABLE' | 'FIXED' | 'NOT_APPLICABLE' | 'INDIRECT';
+
+export interface ExposureArticleCve {
+  cveId: string;
+  cvssScore: number;
+  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  description: string;
+  inKEV: boolean;
+  kevDueDate: string | null;
+}
+
+export interface ExposureTechStackRef {
+  vendor: string;
+  product: string;
+  version: string | null;
+  category: TechStackCategory;
+}
+
+export interface Exposure {
+  id: string;
+  cveId: string;
+  exposureState: ExposureState;
+  firstDetectedAt: string;
+  patchedAt: string | null;
+  remediationDeadline: string | null;
+  articleCve: ExposureArticleCve;
+  techStackItem: ExposureTechStackRef;
+}
+
+export interface ExposureListResponse {
+  data: Exposure[];
+  pagination: PaginationInfo;
+}
+
+export interface ExposureStats {
+  totalVulnerable: number;
+  totalFixed: number;
+  totalNotApplicable: number;
+  totalIndirect: number;
+  totalOverdue: number;
+  patchRate: number;
+  slaCompliance: number;
+  avgMttrDays: number;
+  medianMttrDays: number;
+  kevExposureCount: number;
+  overdueKevCount: number;
+  criticalExposed: number;
+  avgCvssExposed: number;
+}
